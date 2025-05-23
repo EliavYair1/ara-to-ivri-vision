@@ -1,9 +1,11 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
+import { checkServerConnection } from "@/services/api";
 
 type Theme = "dark" | "light";
 type Language = "hebrew" | "english";
 type Direction = "rtl" | "ltr";
+type ServerStatus = "connected" | "disconnected" | "checking";
 
 interface AppContextType {
   theme: Theme;
@@ -12,6 +14,8 @@ interface AppContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
   direction: Direction;
+  serverStatus: ServerStatus;
+  checkServerConnection: () => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -44,6 +48,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   });
 
   const [direction, setDirection] = useState<Direction>("rtl");
+  const [serverStatus, setServerStatus] = useState<ServerStatus>("checking");
 
   useEffect(() => {
     const root = window.document.documentElement;
@@ -73,6 +78,24 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setTheme(theme === "dark" ? "light" : "dark");
   };
 
+  const checkServerConnectionStatus = async () => {
+    setServerStatus("checking");
+    try {
+      const isConnected = await checkServerConnection();
+      setServerStatus(isConnected ? "connected" : "disconnected");
+    } catch (error) {
+      console.error("Error checking server connection:", error);
+      setServerStatus("disconnected");
+    }
+  };
+
+  // Check server connection on component mount
+  useEffect(() => {
+    checkServerConnectionStatus();
+    const intervalId = setInterval(checkServerConnectionStatus, 60000); // Check every minute
+    return () => clearInterval(intervalId);
+  }, []);
+
   return (
     <AppContext.Provider value={{ 
       theme, 
@@ -80,7 +103,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       toggleTheme, 
       language, 
       setLanguage, 
-      direction 
+      direction,
+      serverStatus,
+      checkServerConnection: checkServerConnectionStatus
     }}>
       {children}
     </AppContext.Provider>
