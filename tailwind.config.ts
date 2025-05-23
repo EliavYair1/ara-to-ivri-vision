@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -52,6 +53,12 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
+				talmud: {
+					DEFAULT: '#324262', // deep blue for Talmud theme
+					light: '#E8DFC5', // parchment color
+					accent: '#8D6B48', // leather binding color
+					text: '#1A1C22', // dark text color
+				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
 					foreground: 'hsl(var(--sidebar-foreground))',
@@ -84,12 +91,26 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'fade-in': {
+					'0%': { opacity: '0' },
+					'100%': { opacity: '1' },
+				},
+				'scroll-reveal': {
+					'0%': { transform: 'translateY(10px)', opacity: '0' },
+					'100%': { transform: 'translateY(0)', opacity: '1' },
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
-			}
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'fade-in': 'fade-in 0.5s ease-out',
+				'scroll-reveal': 'scroll-reveal 0.5s ease-out',
+			},
+			fontFamily: {
+				hebrew: ['David Libre', 'SBL Hebrew', 'serif'],
+				aramaic: ['Frank Ruehl CLM', 'SBL BibLit', 'serif']
+			},
 		}
 	},
 	plugins: [require("tailwindcss-animate")],
