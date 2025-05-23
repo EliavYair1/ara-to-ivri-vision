@@ -65,7 +65,7 @@ export default function SearchSection() {
           <div className="flex-1">
             <Input
               dir={direction}
-              className={language === "hebrew" ? "hebrew-text" : ""}
+              className={`${language === "hebrew" ? "hebrew-text" : ""} bg-white dark:bg-gray-900`}
               placeholder={labels.searchPlaceholder}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -134,7 +134,7 @@ export default function SearchSection() {
             ))}
           </div>
         ) : searchTerm && !isSearching ? (
-          <div className="text-center p-10">
+          <div className="text-center p-10 bg-card border rounded-md shadow-sm">
             <p className="text-muted-foreground">
               {labels.noResults} "{searchTerm}"
             </p>
@@ -142,7 +142,7 @@ export default function SearchSection() {
         ) : null}
 
         {!searchTerm && !searchResults.length && (
-          <div className="text-center p-10">
+          <div className="text-center p-10 bg-card border rounded-md shadow-sm">
             <p className={`text-muted-foreground ${language === "hebrew" ? "hebrew-text" : ""}`}>
               {labels.emptyMessage}
             </p>

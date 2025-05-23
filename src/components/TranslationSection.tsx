@@ -2,7 +2,7 @@
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowRightLeft, Copy, RotateCw, Camera, Upload, Share2, MessageSquareText } from "lucide-react";
+import { ArrowRightLeft, Copy, RotateCw, Camera, Upload, Share2, MessageSquareText, SwitchCamera } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { dictionary } from "@/data/dictionary";
 import { useToast } from "@/hooks/use-toast";
@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/dialog";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Input } from "@/components/ui/input";
+import NotesSection from "./NotesSection";
 
 export default function TranslationSection() {
   const [aramaic, setAramaic] = useState("");
@@ -28,18 +29,31 @@ export default function TranslationSection() {
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [showAiModal, setShowAiModal] = useState(false);
   const { toast } = useToast();
-  const { language, direction } = useApp();
+  const { language, direction, translationDirection, setTranslationDirection } = useApp();
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   // Translation labels based on language
   const labels = {
-    title: language === "hebrew" ? "מתרגם ארמית לעברית" : "Aramaic to Hebrew Translator",
-    inputPlaceholder: language === "hebrew" ? "הכנס טקסט בעברית כאן..." : "Enter Hebrew text here...",
-    outputPlaceholder: language === "hebrew" ? "התרגום יופיע כאן..." : "Translation will appear here...",
+    titleAramic: language === "hebrew" 
+      ? "מתרגם ארמית ל" + (language === "hebrew" ? "עברית" : "אנגלית")
+      : "Aramaic to " + (language === "hebrew" ? "Hebrew" : "English") + " Translator",
+    titleSecond: language === "hebrew" 
+      ? (language === "hebrew" ? "עברית" : "אנגלית") + " לארמית"
+      : (language === "hebrew" ? "Hebrew" : "English") + " to Aramaic",
+    inputAramaic: language === "hebrew" 
+      ? "הכנס טקסט בארמית כאן..." 
+      : "Enter Aramaic text here...",
+    inputSecond: language === "hebrew" 
+      ? "הכנס טקסט ב" + (language === "hebrew" ? "עברית" : "אנגלית") + " כאן..." 
+      : "Enter " + (language === "hebrew" ? "Hebrew" : "English") + " text here...",
+    outputPlaceholder: language === "hebrew" 
+      ? "התרגום יופיע כאן..." 
+      : "Translation will appear here...",
     translate: language === "hebrew" ? "תרגם" : "Translate",
     translating: language === "hebrew" ? "מתרגם..." : "Translating...",
     clear: language === "hebrew" ? "נקה" : "Clear",
     copy: language === "hebrew" ? "העתק" : "Copy",
+    switchDirection: language === "hebrew" ? "החלף כיוון" : "Switch Direction",
     tip: language === "hebrew" ? "טיפ:" : "Tip:",
     tipText: language === "hebrew" 
       ? "המתרגם האוטומטי מזהה ומתרגם מילים וביטויים נפוצים בתלמוד. לתוצאות מדויקות יותר, נסה לחפש מילים בודדות במילון."
@@ -58,7 +72,35 @@ export default function TranslationSection() {
     aiModalDesc: language === "hebrew" ? "כאשר התרגום הרגיל אינו זמין, הבינה המלאכותית יכולה לעזור" : "When regular translation is unavailable, AI can help"
   };
 
-  // Simple translation function based on our dictionary
+  // Get the title based on translation direction
+  const getTitle = () => {
+    if (translationDirection === "aramic-to-second") {
+      return labels.titleAramic;
+    } else {
+      return labels.titleSecond;
+    }
+  };
+
+  // Get the input placeholder based on translation direction
+  const getInputPlaceholder = () => {
+    if (translationDirection === "aramic-to-second") {
+      return labels.inputAramaic;
+    } else {
+      return labels.inputSecond;
+    }
+  };
+
+  // Switch translation direction
+  const handleSwitchDirection = () => {
+    const newDirection = translationDirection === "aramic-to-second" 
+      ? "second-to-aramic" 
+      : "aramic-to-second";
+    
+    setTranslationDirection(newDirection);
+    clearText();
+  };
+
+  // Translation function
   const translateText = () => {
     if (!sourceText.trim()) return;
     
@@ -66,51 +108,59 @@ export default function TranslationSection() {
     
     // Simulate API delay
     setTimeout(() => {
-      let translatedAramaic = "";
-      
       // INTEGRATION POINT: API Connection for translation
       // You can replace this code with actual API call to your translation service
       // Example:
-      // const translationResult = await fetchTranslation(sourceText);
+      // const translationResult = await fetchTranslation(sourceText, translationDirection);
       // setAramaic(translationResult.aramaic);
       // setTranslation(translationResult.translation);
-      
-      // Simulation for demo purposes
-      // Convert sourceText to simulated Aramaic
-      if (language === "hebrew") {
+
+      if (translationDirection === "aramic-to-second") {
+        // Aramaic to Second language
+        setAramaic(sourceText); // Keep aramaic as is
+        
+        // Simulate translation
+        let translatedText = sourceText;
         dictionary.forEach(entry => {
-          if (sourceText.includes(entry.hebrew)) {
-            translatedAramaic += entry.aramaic + " ";
-          }
+          const regex = new RegExp(`\\b${entry.aramaic}\\b`, 'g');
+          translatedText = translatedText.replace(regex, entry.hebrew);
         });
+        
+        setTranslation(translatedText);
       } else {
-        dictionary.forEach(entry => {
-          if (sourceText.toLowerCase().includes(entry.hebrew.toLowerCase())) {
-            translatedAramaic += entry.aramaic + " ";
-          }
-        });
+        // Second language to Aramaic
+        let translatedAramaic = "";
+        
+        // Simulate translation to Aramaic
+        if (language === "hebrew") {
+          dictionary.forEach(entry => {
+            if (sourceText.includes(entry.hebrew)) {
+              translatedAramaic += entry.aramaic + " ";
+            }
+          });
+        } else {
+          dictionary.forEach(entry => {
+            if (sourceText.toLowerCase().includes(entry.hebrew.toLowerCase())) {
+              translatedAramaic += entry.aramaic + " ";
+            }
+          });
+        }
+        
+        if (!translatedAramaic.trim()) {
+          translatedAramaic = "אמר רבא הני מילי"; // Default text if no matches
+        }
+        
+        setAramaic(translatedAramaic);
+        setTranslation(sourceText); // Original text is the translation
       }
       
-      if (!translatedAramaic.trim()) {
-        translatedAramaic = "אמר רבא הני מילי"; // Default text if no matches
-      }
-      
-      setAramaic(translatedAramaic);
-      
-      // Now translate the Aramaic to the target language (Hebrew)
-      let translatedText = translatedAramaic;
-      dictionary.forEach(entry => {
-        const regex = new RegExp(`\\b${entry.aramaic}\\b`, 'g');
-        translatedText = translatedText.replace(regex, entry.hebrew);
-      });
-      
-      setTranslation(translatedText);
       setIsTranslating(false);
     }, 1000);
   };
 
   const copyToClipboard = () => {
-    navigator.clipboard.writeText(translation);
+    const textToCopy = translationDirection === "aramic-to-second" ? translation : aramaic;
+    navigator.clipboard.writeText(textToCopy);
     toast({
       title: language === "hebrew" ? "הועתק!" : "Copied!",
       description: language === "hebrew" ? "התרגום הועתק ללוח" : "Translation copied to clipboard",
@@ -118,7 +168,8 @@ export default function TranslationSection() {
   };
 
   const copyAramaicToClipboard = () => {
-    navigator.clipboard.writeText(aramaic);
+    const textToCopy = translationDirection === "aramic-to-second" ? aramaic : translation;
+    navigator.clipboard.writeText(textToCopy);
     toast({
       title: language === "hebrew" ? "הועתק!" : "Copied!",
       description: language === "hebrew" ? "טקסט ארמית הועתק ללוח" : "Aramaic text copied to clipboard",
@@ -162,8 +213,13 @@ export default function TranslationSection() {
     
     setTimeout(() => {
       const sampleAramaicText = "אמר רבא הני מילי";
-      setAramaic(sampleAramaicText);
-      setSourceText(language === "hebrew" ? "אמר החכם דברים אלה" : "The sage said these things");
+      
+      if (translationDirection === "aramic-to-second") {
+        setSourceText(sampleAramaicText);
+      } else {
+        setSourceText(language === "hebrew" ? "אמר החכם דברים אלה" : "The sage said these things");
+      }
+      
       setIsTranslating(false);
       
       // Auto translate after OCR is complete
@@ -174,13 +230,17 @@ export default function TranslationSection() {
   };
 
   const handleShare = async () => {
-    if (!translation) return;
+    const textToShare = translationDirection === "aramic-to-second" ? 
+      `${aramaic}\n\n${translation}` : 
+      `${translation}\n\n${aramaic}`;
+    
+    if (!textToShare.trim()) return;
     
     try {
       if (navigator.share) {
         await navigator.share({
-          title: language === "hebrew" ? "תרגום ארמית לעברית" : "Aramaic to Hebrew Translation",
-          text: `${aramaic}\n\n${translation}`,
+          title: language === "hebrew" ? "תרגום ארמית" : "Aramaic Translation",
+          text: textToShare,
         });
       } else {
         copyToClipboard();
@@ -212,9 +272,19 @@ export default function TranslationSection() {
 
   return (
     <div className="animate-fade-in">
-      <h2 className={`text-2xl font-bold mb-6 ${language === "hebrew" ? "hebrew-text" : "text-left"}`}>
-        {labels.title}
-      </h2>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className={`text-2xl font-bold ${language === "hebrew" ? "hebrew-text" : "text-left"}`}>
+          {getTitle()}
+        </h2>
+        <Button 
+          variant="outline" 
+          onClick={handleSwitchDirection} 
+          className="flex items-center gap-2"
+        >
+          <SwitchCamera className="h-4 w-4" />
+          <span>{labels.switchDirection}</span>
+        </Button>
+      </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-4">
@@ -234,13 +304,13 @@ export default function TranslationSection() {
               <Textarea
                 dir={direction}
                 className={`${language === "hebrew" ? "hebrew-text" : ""} resize-none h-28 bg-transparent border-none text-lg focus-visible:ring-0`}
-                placeholder={labels.inputPlaceholder}
+                placeholder={getInputPlaceholder()}
                 value={sourceText}
                 onChange={(e) => setSourceText(e.target.value)}
                 readOnly={isTranslating}
               />
               
-              {aramaic && (
+              {aramaic && translationDirection === "second-to-aramic" && (
                 <div className="mt-4 pt-4 border-t border-border/50">
                   <div className="flex justify-between items-center mb-2">
                     <h3 className={`text-sm font-medium ${language === "hebrew" ? "hebrew-text" : "text-left"}`}>
@@ -300,11 +370,33 @@ export default function TranslationSection() {
                   <span className="text-muted-foreground">{labels.outputPlaceholder}</span>
                 )}
               </div>
+              
+              {aramaic && translationDirection === "aramic-to-second" && (
+                <div className="mt-4 pt-4 border-t border-border/50">
+                  <div className="flex justify-between items-center mb-2">
+                    <h3 className={`text-sm font-medium ${language === "hebrew" ? "hebrew-text" : "text-left"}`}>
+                      {labels.aramaic}
+                    </h3>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={copyAramaicToClipboard}
+                      className="h-8"
+                    >
+                      <Copy className="h-3.5 w-3.5 mr-1" />
+                      <span className="text-xs">{labels.copy}</span>
+                    </Button>
+                  </div>
+                  <div className="bg-secondary/20 p-3 rounded-md aramaic-text text-sm">
+                    {aramaic}
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
           
-          <div className="flex justify-between">
-            <div className="flex gap-2">
+          <div className="flex justify-between flex-wrap gap-2">
+            <div className="flex gap-2 flex-wrap">
               <input
                 type="file"
                 ref={fileInputRef}
@@ -315,7 +407,7 @@ export default function TranslationSection() {
               
               <Dialog>
                 <DialogTrigger asChild>
-                  <Button variant="outline">
+                  <Button variant="outline" className="whitespace-nowrap">
                     <Camera className="mr-2 h-4 w-4" />
                     {labels.takePhoto}
                   </Button>
@@ -354,6 +446,7 @@ export default function TranslationSection() {
                     fileInputRef.current.click();
                   }
                 }}
+                className="whitespace-nowrap"
               >
                 <Upload className="mr-2 h-4 w-4" />
                 {labels.uploadImage}
@@ -362,6 +455,7 @@ export default function TranslationSection() {
               <Button 
                 variant="outline"
                 onClick={handleAiAssist}
+                className="whitespace-nowrap"
               >
                 <MessageSquareText className="mr-2 h-4 w-4" />
                 {labels.aiAssist}
@@ -373,6 +467,7 @@ export default function TranslationSection() {
                 variant="outline" 
                 onClick={handleShare}
                 disabled={!translation}
+                className="whitespace-nowrap"
               >
                 <Share2 className="mr-2 h-4 w-4" />
                 {labels.shareTranslation}
@@ -382,6 +477,7 @@ export default function TranslationSection() {
                 variant="outline" 
                 onClick={copyToClipboard}
                 disabled={!translation}
+                className="whitespace-nowrap"
               >
                 <Copy className="mr-2 h-4 w-4" />
                 {labels.copy}
@@ -427,6 +523,9 @@ export default function TranslationSection() {
         <p className="font-medium mb-2">{labels.tip}</p>
         <p>{labels.tipText}</p>
       </div>
+
+      {/* Notes Section */}
+      <NotesSection />
     </div>
   );
 }

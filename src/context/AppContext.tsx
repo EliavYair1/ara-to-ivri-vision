@@ -5,6 +5,7 @@ import { checkServerConnection } from "@/services/api";
 type Theme = "dark" | "light";
 type Language = "hebrew" | "english";
 type Direction = "rtl" | "ltr";
+type TranslationDirection = "aramic-to-second" | "second-to-aramic";
 type ServerStatus = "connected" | "disconnected" | "checking";
 
 interface AppContextType {
@@ -15,6 +16,8 @@ interface AppContextType {
   setLanguage: (lang: Language) => void;
   direction: Direction;
   serverStatus: ServerStatus;
+  translationDirection: TranslationDirection;
+  setTranslationDirection: (direction: TranslationDirection) => void;
   checkServerConnection: () => Promise<void>;
 }
 
@@ -47,6 +50,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return "hebrew";
   });
 
+  const [translationDirection, setTranslationDirection] = useState<TranslationDirection>("aramic-to-second");
+  
   const [direction, setDirection] = useState<Direction>("rtl");
   const [serverStatus, setServerStatus] = useState<ServerStatus>("checking");
 
@@ -105,6 +110,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setLanguage, 
       direction,
       serverStatus,
+      translationDirection,
+      setTranslationDirection,
       checkServerConnection: checkServerConnectionStatus
     }}>
       {children}
