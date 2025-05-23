@@ -1,5 +1,6 @@
 
 @import url('https://fonts.googleapis.com/css2?family=David+Libre:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -74,12 +75,21 @@
     @apply border-border;
   }
 
+  html[dir="rtl"] * {
+    font-family: 'David Libre', serif;
+  }
+
+  html[dir="ltr"] * {
+    font-family: 'Rubik', sans-serif;
+  }
+
   body {
     @apply bg-background text-foreground;
   }
 
   .hebrew-text {
-    @apply font-hebrew text-right;
+    font-family: 'David Libre', serif;
+    @apply text-right;
     direction: rtl;
   }
 
@@ -106,7 +116,41 @@
   }
 
   .paper-effect {
-    @apply bg-gradient-to-br from-secondary/80 to-secondary;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+    @apply bg-gradient-to-br from-secondary/80 to-secondary/40 dark:from-secondary/20 dark:to-secondary/5;
+    box-shadow: 0 3px 15px rgba(0, 0, 0, 0.08);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .paper-effect::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    @apply bg-gradient-to-r from-primary/80 via-primary to-primary/50;
+  }
+  
+  /* Enhanced animations */
+  @keyframes pulse-glow {
+    0%, 100% {
+      box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+    }
+    50% {
+      box-shadow: 0 0 20px rgba(59, 130, 246, 0.6);
+    }
+  }
+  
+  .glow-effect {
+    animation: pulse-glow 2s infinite;
+  }
+  
+  .btn-hover {
+    @apply transform transition-all duration-200;
+  }
+  
+  .btn-hover:hover {
+    @apply -translate-y-1 shadow-md;
   }
 }
