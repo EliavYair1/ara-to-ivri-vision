@@ -1,4 +1,3 @@
-
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -132,19 +131,11 @@ export default function TranslationSection() {
         let translatedAramaic = "";
         
         // Simulate translation to Aramaic
-        if (language === "hebrew") {
-          dictionary.forEach(entry => {
-            if (sourceText.includes(entry.hebrew)) {
-              translatedAramaic += entry.aramaic + " ";
-            }
-          });
-        } else {
-          dictionary.forEach(entry => {
-            if (sourceText.toLowerCase().includes(entry.hebrew.toLowerCase())) {
-              translatedAramaic += entry.aramaic + " ";
-            }
-          });
-        }
+        dictionary.forEach(entry => {
+          if (sourceText.toLowerCase().includes(entry.hebrew.toLowerCase())) {
+            translatedAramaic += entry.aramaic + " ";
+          }
+        });
         
         if (!translatedAramaic.trim()) {
           translatedAramaic = "אמר רבא הני מילי"; // Default text if no matches

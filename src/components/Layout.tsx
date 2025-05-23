@@ -1,5 +1,4 @@
 
-import { AppProvider } from "@/context/AppContext";
 import Navbar from "@/components/Navbar";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -47,36 +46,34 @@ export default function Layout({ children }: LayoutProps) {
   }, [toast]);
   
   return (
-    <AppProvider>
-      <div className="min-h-screen flex flex-col transition-colors duration-300">
-        <Navbar />
-        <main className="flex-1 container py-6">{children}</main>
-        <footer className="border-t py-4 bg-card/50">
-          <div className="container flex justify-between items-center text-sm text-muted-foreground">
-            <p>© {new Date().getFullYear()} חכמת השפה - Language Wisdom</p>
-            <div className="flex items-center gap-2">
-              {serverConnected === true && (
-                <div className="flex items-center text-emerald-600 dark:text-emerald-400">
-                  <Wifi className="h-4 w-4 mr-1" />
-                  <span className="text-xs">שרת מחובר</span>
-                </div>
-              )}
-              {serverConnected === false && (
-                <div className="flex items-center text-rose-600 dark:text-rose-400">
-                  <WifiOff className="h-4 w-4 mr-1" />
-                  <span className="text-xs">שרת מנותק</span>
-                </div>
-              )}
-              {serverConnected === null && (
-                <div className="flex items-center text-amber-600 dark:text-amber-400">
-                  <div className="h-2 w-2 rounded-full bg-amber-500 animate-pulse mr-1"></div>
-                  <span className="text-xs">בודק חיבור</span>
-                </div>
-              )}
-            </div>
+    <div className="min-h-screen flex flex-col transition-colors duration-300">
+      <Navbar />
+      <main className="flex-1 container py-6">{children}</main>
+      <footer className="border-t py-4 bg-card/50">
+        <div className="container flex justify-between items-center text-sm text-muted-foreground">
+          <p>© {new Date().getFullYear()} חכמת השפה - Language Wisdom</p>
+          <div className="flex items-center gap-2">
+            {serverConnected === true && (
+              <div className="flex items-center text-emerald-600 dark:text-emerald-400">
+                <Wifi className="h-4 w-4 mr-1" />
+                <span className="text-xs">שרת מחובר</span>
+              </div>
+            )}
+            {serverConnected === false && (
+              <div className="flex items-center text-rose-600 dark:text-rose-400">
+                <WifiOff className="h-4 w-4 mr-1" />
+                <span className="text-xs">שרת מנותק</span>
+              </div>
+            )}
+            {serverConnected === null && (
+              <div className="flex items-center text-amber-600 dark:text-amber-400">
+                <div className="h-2 w-2 rounded-full bg-amber-500 animate-pulse mr-1"></div>
+                <span className="text-xs">בודק חיבור</span>
+              </div>
+            )}
           </div>
-        </footer>
-      </div>
-    </AppProvider>
+        </div>
+      </footer>
+    </div>
   );
 }
